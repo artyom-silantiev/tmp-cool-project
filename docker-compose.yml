@@ -2,8 +2,8 @@ version: '3.7'
 
 services:
   traefik:
+    container_name: "tmp-cool-traefik"
     image: "traefik:v2.9"
-    container_name: "traefik"
     command:
       #- "--log.level=DEBUG"
       - "--api.insecure=true"
@@ -15,6 +15,20 @@ services:
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  portainer:
+    container_name: tmp-cool-portainer
+    image: portainer/portainer-ce:2.5.0-alpine
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.localhost`)"
+      - "traefik.http.routers.portainer.entrypoints=web"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer.service=portainer"
 
   db:
     container_name: tmp-cool-db
@@ -77,21 +91,7 @@ services:
       - VUE_BASE_URL_API=http://tmp-cool-backend:3000/api
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.site-ssr.loadbalancer.server.port=3300"
-      - "traefik.http.routers.site-ssr.rule=Host(`site.localhost`)"
-      - "traefik.http.routers.site-ssr.entrypoints=web"
-      - "traefik.http.routers.site-ssr.service=site-ssr"
-
-  portainer:
-    container_name: tmp-cool-portainer
-    image: portainer/portainer-ce:2.5.0-alpine
-    command: -H unix:///var/run/docker.sock
-    restart: always
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.portainer.rule=Host(`portainer.localhost`)"
-      - "traefik.http.routers.portainer.entrypoints=web"
-      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-      - "traefik.http.routers.portainer.service=portainer"
+      - "traefik.http.services.sitessr.loadbalancer.server.port=3300"
+      - "traefik.http.routers.sitessr.rule=Host(`site.localhost`)"
+      - "traefik.http.routers.sitessr.entrypoints=web"
+      - "traefik.http.routers.sitessr.service=sitessr"

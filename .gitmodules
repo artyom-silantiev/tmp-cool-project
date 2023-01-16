@@ -1,0 +1,6 @@
+[submodule "backend"]
+	path = backend
+	url = https://github.com/artyom-silantiev/tmp-nestjs-back
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/artyom-silantiev/tmp-q-site
