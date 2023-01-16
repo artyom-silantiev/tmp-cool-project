@@ -1,0 +1,97 @@
+version: '3.7'
+
+services:
+  traefik:
+    image: "traefik:v2.9"
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  db:
+    container_name: tmp-cool-db
+    image: "postgres:14.6"
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+        - "127.0.0.1:5432:5432"
+
+  redis:
+    container_name: tmp-cool-redis
+    image: redis
+    ports:
+      - '127.0.0.1:6379:6379'
+    restart: always
+
+  s3:
+    container_name: tmp-cool-s3
+    image: minio/minio
+    command: server /data
+    ports:
+      - '127.0.0.1:9000:9000'
+    environment:
+      MINIO_ACCESS_KEY: S3_ACCESS_KEY
+      MINIO_SECRET_KEY: S3_SECRET_KEY
+
+  backend:
+    container_name: tmp-cool-backend
+    build: 
+      context: backend
+      dockerfile: ./Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@tmp-cool-db:5432/postgres?schema=public
+      - REDIS_HOST=tmp-cool-redis
+      - AWS_S3_IS_LOCAL=1
+      - AWS_S3_ENDPOINT=http://tmp-cool-s3:9000
+    command: sh -c "
+        sleep 10 &&
+        npm run devs &&
+        npm run start:web:prod"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend.rule=Host(`site.localhost`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.service=backend"
+
+  site:
+    container_name: tmp-cool-site
+    build: 
+      context: frontend
+      dockerfile: ./Dockerfile
+    environment:
+      - VUE_BASE_URL_API=http://tmp-cool-backend:3000/api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.site-ssr.loadbalancer.server.port=3300"
+      - "traefik.http.routers.site-ssr.rule=Host(`site.localhost`)"
+      - "traefik.http.routers.site-ssr.entrypoints=web"
+      - "traefik.http.routers.site-ssr.service=site-ssr"
+
+  portainer:
+    container_name: tmp-cool-portainer
+    image: portainer/portainer-ce:2.5.0-alpine
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.localhost`)"
+      - "traefik.http.routers.portainer.entrypoints=web"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer.service=portainer"
