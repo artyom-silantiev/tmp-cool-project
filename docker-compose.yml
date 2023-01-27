@@ -37,6 +37,9 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - PGDATA=/pgdata
+    volumes:
+      - app-data:/pgdata
     logging:
       options:
         max-size: 10m
@@ -51,16 +54,29 @@ services:
       - '127.0.0.1:6379:6379'
     restart: always
 
+  backup_app:
+    container_name: tmp-cool-backup_app
+    build: 
+      context: backup_app
+      dockerfile: ./Dockerfile
+    environment:
+      - NODE_HOST=tmp-cool-backup_app
+    volumes:
+      - app-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+
   backend:
     container_name: tmp-cool-backend
     build: 
       context: backend
       dockerfile: ./Dockerfile
     environment:
+      - NODE_HOST=tmp-cool-backend
       - DATABASE_URL=postgresql://postgres:postgres@tmp-cool-db:5432/postgres?schema=public
       - REDIS_HOST=tmp-cool-redis
-      - AWS_S3_IS_LOCAL=1
-      - AWS_S3_ENDPOINT=http://tmp-cool-s3:9000
+      - DIR_DATA=/data
+    volumes:
+      - app-data:/data
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
@@ -81,3 +97,6 @@ services:
       - "traefik.http.routers.sitessr.rule=Host(`site.localhost`)"
       - "traefik.http.routers.sitessr.entrypoints=web"
       - "traefik.http.routers.sitessr.service=sitessr"
+
+volumes:
+     app-data: 
