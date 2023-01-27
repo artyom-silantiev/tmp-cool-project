@@ -1,5 +1,5 @@
-import { BackupsController } from "./backups.controller";
-import { Route } from "./core/router";
+import { BackupsController } from './backups.controller';
+import { Route } from './core/router';
 
 export default [
   {

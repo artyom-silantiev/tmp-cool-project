@@ -35,7 +35,11 @@ export class Router {
 }
 
 export type Ctx = ReturnType<typeof getCtx>;
-function getCtx(req: express.Request, res: express.Response, next: express.NextFunction) {
+function getCtx(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
   return {
     body: req.body || null,
     params: req.params || null,
@@ -43,11 +47,14 @@ function getCtx(req: express.Request, res: express.Response, next: express.NextF
     headers: req.headers || null,
     req,
     res,
-    next
+    next,
   };
 }
 
-function getExpressRouterHandler(method: Method, expressRouter: express.Router) {
+function getExpressRouterHandler(
+  method: Method,
+  expressRouter: express.Router
+) {
   let expressRouterHandler;
 
   if (method === 'USE') {
@@ -73,24 +80,42 @@ function getExpressRouterHandler(method: Method, expressRouter: express.Router) 
   return expressRouterHandler;
 }
 
-function useCtxHandlers(ctxHandlers: RouteCtxHandler[], expressRouter: express.Router, routePath: string) {
+function useCtxHandlers(
+  ctxHandlers: RouteCtxHandler[],
+  expressRouter: express.Router,
+  routePath: string
+) {
   for (const ctxHandler of ctxHandlers) {
     useRouteCtxHandler(ctxHandler, expressRouter, routePath);
   }
 }
 
-function useRouteCtxHandler(routeCtxHandler: RouteCtxHandler, expressRouter: express.Router, routePath: string) {
-  const expressHandler = getExpressRouterHandler(routeCtxHandler.method, expressRouter);
+function useRouteCtxHandler(
+  routeCtxHandler: RouteCtxHandler,
+  expressRouter: express.Router,
+  routePath: string
+) {
+  const expressHandler = getExpressRouterHandler(
+    routeCtxHandler.method,
+    expressRouter
+  );
 
   let path = '';
   if (routeCtxHandler.path) {
-    if (!_.startsWith(routeCtxHandler.path, '/') && routeCtxHandler.path.length > 0) {
+    if (
+      !_.startsWith(routeCtxHandler.path, '/') &&
+      routeCtxHandler.path.length > 0
+    ) {
       routeCtxHandler.path = '/' + routeCtxHandler.path;
     }
     path = routeCtxHandler.path;
   }
 
-  const handler = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const handler = async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
     try {
       const ctx = getCtx(req, res, next);
       const resData = await routeCtxHandler.handler(ctx);
@@ -105,7 +130,7 @@ function useRouteCtxHandler(routeCtxHandler: RouteCtxHandler, expressRouter: exp
     } catch (error) {
       next(error);
     }
-  }
+  };
 
   if (routeCtxHandler.method === 'USE') {
     expressHandler.apply(expressRouter, [handler]);
@@ -113,10 +138,17 @@ function useRouteCtxHandler(routeCtxHandler: RouteCtxHandler, expressRouter: exp
     expressHandler.apply(expressRouter, [path, handler]);
   }
 
-  logger.log(`${routeCtxHandler.method} ${(routePath + path).replace('//', '/')}`);
+  logger.log(
+    `${routeCtxHandler.method} ${(routePath + path).replace('//', '/')}`
+  );
 }
 
-export function parseRouter(router: Router, app: express.Application | express.Router, path: string, level: number) {
+export function parseRouter(
+  router: Router,
+  app: express.Application | express.Router,
+  path: string,
+  level: number
+) {
   if (!_.startsWith(path, '/')) {
     path = '/' + path;
   }
@@ -137,10 +169,14 @@ export function parseRouter(router: Router, app: express.Application | express.R
 
     if (route.middlewares) {
       for (const middleware of route.middlewares) {
-        useRouteCtxHandler({
-          method: 'USE',
-          handler: middleware,
-        }, expressRouter, routePath);
+        useRouteCtxHandler(
+          {
+            method: 'USE',
+            handler: middleware,
+          },
+          expressRouter,
+          routePath
+        );
       }
     }
 
@@ -165,9 +201,14 @@ export function parseRouter(router: Router, app: express.Application | express.R
     }
 
     if (route.subRoutes) {
-      parseRouter({
-        routes: route.subRoutes
-      }, expressRouter, routePath, level + 1);
+      parseRouter(
+        {
+          routes: route.subRoutes,
+        },
+        expressRouter,
+        routePath,
+        level + 1
+      );
     }
 
     if (route.static) {

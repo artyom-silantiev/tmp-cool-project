@@ -22,27 +22,43 @@ type ScheduleHandler = {
 };
 
 export function Schedule(schedule: string) {
-  return function (target: Object, key: string | symbol, descriptor: PropertyDescriptor) {
+  return function (
+    target: Object,
+    key: string | symbol,
+    descriptor: PropertyDescriptor
+  ) {
     if (!Reflect.hasMetadata(sScheduleHandlers, target)) {
       Reflect.defineMetadata(sScheduleHandlers, [], target);
     }
 
-    const scheduleHandlers = Reflect.getMetadata(sScheduleHandlers, target) as ScheduleHandler[];
+    const scheduleHandlers = Reflect.getMetadata(
+      sScheduleHandlers,
+      target
+    ) as ScheduleHandler[];
     scheduleHandlers.push({
-      schedule, target, key
+      schedule,
+      target,
+      key,
     });
   } as MethodDecorator;
 }
 
 function useSchedules(cronService: any) {
-  const scheduleHandlers = Reflect.getMetadata(sScheduleHandlers, cronService) as ScheduleHandler[];
+  const scheduleHandlers = Reflect.getMetadata(
+    sScheduleHandlers,
+    cronService
+  ) as ScheduleHandler[];
   if (!scheduleHandlers || scheduleHandlers.length === 0) {
     return;
   }
 
   for (const scheduleHandler of scheduleHandlers) {
-    const handler = scheduleHandler.target[scheduleHandler.key].bind(scheduleHandler.target) as () => Promise<void> | void;
-    const name = `${scheduleHandler.target.constructor.name}@${scheduleHandler.key.toString()}`;
+    const handler = scheduleHandler.target[scheduleHandler.key].bind(
+      scheduleHandler.target
+    ) as () => Promise<void> | void;
+    const name = `${
+      scheduleHandler.target.constructor.name
+    }@${scheduleHandler.key.toString()}`;
     new CronJob(scheduleHandler.schedule, async () => {
       try {
         await handler();
@@ -66,27 +82,43 @@ type QueueJobHandler = {
 };
 
 export function QueueJob(delayMs: number) {
-  return function (target: Object, key: string | symbol, descriptor: PropertyDescriptor) {
+  return function (
+    target: Object,
+    key: string | symbol,
+    descriptor: PropertyDescriptor
+  ) {
     if (!Reflect.hasMetadata(sQueueJobHandlers, target)) {
       Reflect.defineMetadata(sQueueJobHandlers, [], target);
     }
 
-    const queueJobHandlers = Reflect.getMetadata(sQueueJobHandlers, target) as QueueJobHandler[];
+    const queueJobHandlers = Reflect.getMetadata(
+      sQueueJobHandlers,
+      target
+    ) as QueueJobHandler[];
     queueJobHandlers.push({
-      delayMs, target, key
+      delayMs,
+      target,
+      key,
     });
   } as MethodDecorator;
 }
 
 function useQueueJobs(cronService: any) {
-  const queueJobHandlers = Reflect.getMetadata(sQueueJobHandlers, cronService) as QueueJobHandler[];
+  const queueJobHandlers = Reflect.getMetadata(
+    sQueueJobHandlers,
+    cronService
+  ) as QueueJobHandler[];
   if (!queueJobHandlers || queueJobHandlers.length === 0) {
     return;
   }
 
   for (const queueJobHandler of queueJobHandlers) {
-    const handler = queueJobHandler.target[queueJobHandler.key].bind(queueJobHandler.target) as () => Promise<void> | void;
-    const name = `${queueJobHandler.target.constructor.name}@${queueJobHandler.key.toString()}`;
+    const handler = queueJobHandler.target[queueJobHandler.key].bind(
+      queueJobHandler.target
+    ) as () => Promise<void> | void;
+    const name = `${
+      queueJobHandler.target.constructor.name
+    }@${queueJobHandler.key.toString()}`;
 
     const queueHandle = async () => {
       try {

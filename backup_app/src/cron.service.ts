@@ -1,4 +1,4 @@
-import { Cron, ScheduleExpression, QueueJob, Schedule } from "./core/cron";
+import { Cron, ScheduleExpression, QueueJob, Schedule } from './core/cron';
 
 @Cron()
 export class CronService {
