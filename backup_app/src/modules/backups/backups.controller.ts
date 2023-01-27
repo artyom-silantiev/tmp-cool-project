@@ -1,8 +1,11 @@
-import { Controller, Delete, Get, Post } from './core/controller';
-import { Ctx } from './core/router';
+import { Controller, Delete, Get, Post } from '@core/controller';
+import { Ctx } from '@core/router';
+import { BackupsService } from './backups.service';
 
 @Controller()
 export class BackupsController {
+  constructor(private backupsService: BackupsService) {}
+
   @Get('')
   getBackups(ctx: Ctx) {}
 

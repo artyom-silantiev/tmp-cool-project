@@ -1,9 +1,9 @@
-import { BackupsController } from './backups.controller';
+import { BackupsModule } from 'modules/backups/backups.module';
 import { Route } from './core/router';
 
 export default [
   {
     path: 'api/backups',
-    controller: new BackupsController(),
+    controller: BackupsModule.backupsController,
   },
 ] as Route[];
