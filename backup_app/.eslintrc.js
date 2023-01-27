@@ -2,16 +2,18 @@ module.exports = {
   env: {
     node: true,
   },
-  extends: ["eslint:recommended"],
+  extends: ['eslint:recommended'],
   overrides: [],
-  parser: "@typescript-eslint/parser",
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: "latest",
-    sourceType: "module",
+    ecmaVersion: 'latest',
+    sourceType: 'module',
   },
-  plugins: ["@typescript-eslint"],
+  plugins: ['@typescript-eslint'],
   rules: {
-    "no-empty": "off",
-    "no-unused-vars": "off",
+    'no-empty': 'off',
+    'no-unused-vars': 'off',
+
+    quotes: [2, 'single', { avoidEscape: true, allowTemplateLiterals: true }],
   },
 };

@@ -39,5 +39,8 @@
     "webpack-node-externals": "^3.0.0"
   },
   "author": "Artyom Silantiev",
-  "license": "ISC"
+  "license": "ISC",
+  "prettier": {
+    "singleQuote": true
+  }
 }
