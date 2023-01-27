@@ -24,15 +24,10 @@ export type Route = {
   ctxHandlers?: RouteCtxHandler[];
   controller?: any;
   controllers?: any[];
-  subRouter?: Router;
   subRoutes?: Route[];
 
   static?: StaticOptions;
 };
-
-export class Router {
-  routes = [] as Route[];
-}
 
 export type Ctx = ReturnType<typeof getCtx>;
 function getCtx(
@@ -143,17 +138,17 @@ function useRouteCtxHandler(
   );
 }
 
-export function parseRouter(
-  router: Router,
+function parseRoutes(
   app: express.Application | express.Router,
-  path: string,
-  level: number
+  routes: Route[],
+  path: string = '',
+  level: number = 0
 ) {
   if (!_.startsWith(path, '/')) {
     path = '/' + path;
   }
 
-  for (const route of router.routes) {
+  for (const route of routes) {
     if (_.startsWith(route.path, '/')) {
       route.path = route.path.substring(1);
     }
@@ -196,19 +191,8 @@ export function parseRouter(
       }
     }
 
-    if (route.subRouter) {
-      parseRouter(route.subRouter, expressRouter, routePath, level + 1);
-    }
-
     if (route.subRoutes) {
-      parseRouter(
-        {
-          routes: route.subRoutes,
-        },
-        expressRouter,
-        routePath,
-        level + 1
-      );
+      parseRoutes(expressRouter, route.subRoutes, routePath, level + 1);
     }
 
     if (route.static) {
@@ -222,4 +206,8 @@ export function parseRouter(
       (app as express.Router).use(routePath, expressRouter);
     }
   }
+}
+
+export function initAppRouter(app: express.Application, routes: Route[]) {
+  parseRoutes(app, routes, '', 0);
 }

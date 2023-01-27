@@ -1,27 +1,28 @@
+import 'reflect-metadata';
+import express from 'express';
 import bodyParser from 'body-parser';
 import { createAppLogger } from './app-logger';
-import { Application } from './core/application';
 import { useCronService } from './core/cron';
 import { CronService } from './cron.service';
 import { useEnv } from './env/env';
 import routes from './routes';
+import { initAppRouter } from '@core/router';
+import { httpErrorCatch } from '@core/catch_error';
 
 const logger = createAppLogger('App');
 
-function bootstrap() {
+async function bootstrap() {
   const env = useEnv();
-  const app = new Application();
+  const app = express();
 
-  app.upgrade((app) => {
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: false }));
-  });
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: false }));
+  initAppRouter(app, routes);
+  app.use(httpErrorCatch);
 
-  app.setRoutes(routes);
+  useCronService(new CronService());
 
   app.listen(env.NODE_PORT, () => {
-    useCronService(new CronService());
-
     logger.debug('dev env used');
     logger.log('env: ', env);
     logger.log(`app listen port: ${env.NODE_PORT}`);

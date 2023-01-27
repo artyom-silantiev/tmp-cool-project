@@ -6,7 +6,7 @@ export class HttpException extends Error {
   }
 }
 
-export function catchError(
+export function httpErrorCatch(
   err: Error,
   req: express.Request,
   res: express.Response,
