@@ -1,16 +1,19 @@
+import { defineModule } from '@core/module';
 import { BackupsController } from './backups.controller';
 import { BackupsService } from './backups.service';
 
-export const BackupsModule = (() => {
-  const backupsService = new BackupsService();
-  const backupsController = new BackupsController(backupsService);
+export const BackupsModule = defineModule((ctx) => {
+  const backupsService = ctx.use(() => new BackupsService());
+  const backupsController = ctx.use(
+    () => new BackupsController(backupsService)
+  );
 
-  const init = async () => {};
+  ctx.onModuleInit(() => {
+    console.log('onModuleInit', 'BackupsModule');
+  });
 
   return {
-    init,
-
     backupsService,
     backupsController,
   };
-})();
+});

@@ -6,6 +6,10 @@ import { BackupsService } from './backups.service';
 export class BackupsController {
   constructor(private backupsService: BackupsService) {}
 
+  onModuleInit() {
+    console.log('onModuleInit', 'BackupsController');
+  }
+
   @Get('')
   getBackups(ctx: Ctx) {}
 
