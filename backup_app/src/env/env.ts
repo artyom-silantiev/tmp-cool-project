@@ -44,7 +44,10 @@ export class Env {
   NODE_APP_TYPE = NODE_APP_TYPE;
   NODE_ROLE = toEnum(E.NODE_ROLE, Object.values(NodeRole), NodeRole.MASTER) as NodeRole;
 
-  DIR_DATA = toPath(E.DIR_DATA, './data');
+  DIR_TEMP = toPath(E.DIR_TEMP, './temp');
+  DIR_DATA = toPath(E.DIR_DATA, './data/data');
+  DIR_DATA_FOR_BACKUP = toPath(E.DIR_DATA_FOR_BACKUP, './data/app');
+  DIR_BACKUPS = toPath(E.DIR_BACKUPS, './data/backups');
 
   isDevEnv() {
     return this.NODE_ENV === NodeEnvType.development;
@@ -134,7 +137,7 @@ export function toArrayStrings(envParam: string, spliter: string, defaultValue: 
     try {
       const values = envParam.split(spliter);
       return values;
-    } catch (error) { }
+    } catch (error) {}
   }
   return defaultValue;
 }

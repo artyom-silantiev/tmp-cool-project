@@ -5,7 +5,11 @@ export const BackupsModule = (() => {
   const backupsService = new BackupsService();
   const backupsController = new BackupsController(backupsService);
 
+  const init = async () => {};
+
   return {
+    init,
+
     backupsService,
     backupsController,
   };

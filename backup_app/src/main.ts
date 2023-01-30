@@ -8,6 +8,7 @@ import { useEnv } from './env/env';
 import routes from './routes';
 import { initAppRouter } from '@core/router';
 import { httpErrorCatch } from '@core/catch_error';
+import { BackupsModule } from 'modules/backups/backups.module';
 
 const logger = createAppLogger('App');
 
@@ -19,8 +20,9 @@ async function bootstrap() {
   app.use(bodyParser.urlencoded({ extended: false }));
   initAppRouter(app, routes);
   app.use(httpErrorCatch);
-
   useCronService(new CronService());
+
+  BackupsModule;
 
   app.listen(env.NODE_PORT, () => {
     logger.debug('dev env used');

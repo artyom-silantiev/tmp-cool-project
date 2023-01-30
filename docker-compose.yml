@@ -1,20 +1,20 @@
-version: '3.7'
+version: '3.9'
 
 services:
   traefik:
-    container_name: "tmp-cool-traefik"
-    image: "traefik:v2.9"
+    container_name: 'tmp-cool-traefik'
+    image: 'traefik:v2.9'
     command:
       #- "--log.level=DEBUG"
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
+      - '--api.insecure=true'
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--entrypoints.web.address=:80'
     ports:
-      - "80:80"
-      - "8080:8080"
+      - '80:80'
+      - '8080:8080'
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
 
   portainer:
     container_name: tmp-cool-portainer
@@ -24,28 +24,27 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.portainer.rule=Host(`portainer.localhost`)"
-      - "traefik.http.routers.portainer.entrypoints=web"
-      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-      - "traefik.http.routers.portainer.service=portainer"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.portainer.rule=Host(`portainer.localhost`)'
+      - 'traefik.http.routers.portainer.entrypoints=web'
+      - 'traefik.http.services.portainer.loadbalancer.server.port=9000'
+      - 'traefik.http.routers.portainer.service=portainer'
 
   db:
     container_name: tmp-cool-db
-    image: "postgres:14.6"
+    image: 'postgres:14.6'
     restart: always
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - PGDATA=/pgdata
     volumes:
-      - app-data:/pgdata
+      - db_pg_data:/var/lib/postgresql/data
     logging:
       options:
         max-size: 10m
-        max-file: "3"
+        max-file: '3'
     ports:
-        - "127.0.0.1:5432:5432"
+      - '127.0.0.1:5432:5432'
 
   redis:
     container_name: tmp-cool-redis
@@ -56,47 +55,55 @@ services:
 
   backup_app:
     container_name: tmp-cool-backup_app
-    build: 
+    image: tmp-cool-backup_app
+    build:
       context: backup_app
       dockerfile: ./Dockerfile
     environment:
       - NODE_HOST=tmp-cool-backup_app
+      - DIR_DATA_FOR_BACKUP=/appdata/data
+      - DIR_BACKUPS=/appdata/backups
     volumes:
-      - app-data:/data
+      - app_data:/appdata/data
+      - backups_data:/appdata/backups
       - /var/run/docker.sock:/var/run/docker.sock
 
   backend:
     container_name: tmp-cool-backend
-    build: 
+    image: tmp-cool-backend
+    build:
       context: backend
       dockerfile: ./Dockerfile
     environment:
       - NODE_HOST=tmp-cool-backend
       - DATABASE_URL=postgresql://postgres:postgres@tmp-cool-db:5432/postgres?schema=public
       - REDIS_HOST=tmp-cool-redis
-      - DIR_DATA=/data
+      - DIR_DATA=/appdata/data
     volumes:
-      - app-data:/data
+      - app_data:/appdata/data
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.backend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.backend.rule=Host(`site.localhost`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.backend.entrypoints=web"
-      - "traefik.http.routers.backend.service=backend"
+      - 'traefik.enable=true'
+      - 'traefik.http.services.backend.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.backend.rule=Host(`site.localhost`) && PathPrefix(`/api`)'
+      - 'traefik.http.routers.backend.entrypoints=web'
+      - 'traefik.http.routers.backend.service=backend'
 
   site:
     container_name: tmp-cool-site
-    build: 
+    image: tmp-cool-site
+    build:
       context: frontend
       dockerfile: ./Dockerfile
     environment:
       - VUE_BASE_URL_API=http://tmp-cool-backend:3000/api
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.sitessr.loadbalancer.server.port=3300"
-      - "traefik.http.routers.sitessr.rule=Host(`site.localhost`)"
-      - "traefik.http.routers.sitessr.entrypoints=web"
-      - "traefik.http.routers.sitessr.service=sitessr"
+      - 'traefik.enable=true'
+      - 'traefik.http.services.sitessr.loadbalancer.server.port=3300'
+      - 'traefik.http.routers.sitessr.rule=Host(`site.localhost`)'
+      - 'traefik.http.routers.sitessr.entrypoints=web'
+      - 'traefik.http.routers.sitessr.service=sitessr'
 
 volumes:
-     app-data: 
+  - db_pg_data:
+  - app_data:
+  - backups_data:
