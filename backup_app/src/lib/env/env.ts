@@ -49,6 +49,11 @@ export class Env {
   DIR_DATA_FOR_BACKUP = toPath(E.DIR_DATA_FOR_BACKUP, './data/app');
   DIR_BACKUPS = toPath(E.DIR_BACKUPS, './data/backups');
 
+  POSTGRES_HOST = toPath(E.POSTGRES_HOST, 'tmp-cool-db');
+  POSTGRES_DB = toPath(E.POSTGRES_DB, 'appdb');
+  POSTGRES_USER = toPath(E.POSTGRES_USER, 'postgres');
+  POSTGRES_PASSWORD = toPath(E.POSTGRES_PASSWORD, 'postgres');
+
   isDevEnv() {
     return this.NODE_ENV === NodeEnvType.development;
   }

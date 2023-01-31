@@ -19,10 +19,10 @@ function getModuleSetupCtx(meta: ModuleMeta) {
       meta.items.push(item);
       return item;
     },
-    onModuleInit(handler: LifecycleHandler) {
+    onInit(handler: LifecycleHandler) {
       meta.initHandler = handler;
     },
-    onModuleDestroy(handler: LifecycleHandler) {
+    onDestroy(handler: LifecycleHandler) {
       meta.destroyHandler = handler;
     },
   };
@@ -32,7 +32,7 @@ type ModuleSetupCtx = ReturnType<typeof getModuleSetupCtx>;
 export type ModuleSetup<T> = (ctx: ModuleSetupCtx) => T;
 
 let modulesCount = 0;
-export function defineModule<T>(setup: ModuleSetup<T>) {
+export function define<T>(setup: ModuleSetup<T>) {
   const moduleId = modulesCount++;
 
   const meta = {

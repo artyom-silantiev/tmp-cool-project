@@ -11,27 +11,32 @@ export class BackupsController {
   }
 
   @Get('')
-  getBackups(ctx: Ctx) {
-    return '';
+  async getBackups(ctx: Ctx) {
+    return await this.backupsService.getBackups();
   }
 
   @Post('')
-  createBackup(ctx: Ctx) {
+  async createBackup(ctx: Ctx) {
+    const backupFileInfo = await this.backupsService.createBackup();
+    return backupFileInfo;
+  }
+
+  @Post(':name')
+  async useBackup(ctx: Ctx) {
+    await this.backupsService.restoreFromBackup(ctx.params['name']);
     return '';
   }
 
-  @Post(':uid')
-  useBackup(ctx: Ctx) {
-    return '';
-  }
-
-  @Delete(':uid')
-  deleteBackups(ctx: Ctx) {
+  @Delete(':name')
+  async deleteBackups(ctx: Ctx) {
+    await this.backupsService.deleteBackupFile(ctx.params['name']);
     return '';
   }
 
   @Post('load')
   loadBackup(ctx: Ctx) {
     return '';
+
+    // TODO
   }
 }

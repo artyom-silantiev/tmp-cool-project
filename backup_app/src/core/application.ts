@@ -1,4 +1,4 @@
-import { defineModule, ModuleSetup, ModuleWrap } from './module';
+import { define, ModuleSetup, ModuleWrap } from './module';
 
 const modules = [] as ModuleWrap<unknown>[];
 
@@ -7,7 +7,7 @@ export function addAppModule<T>(moduleWrap: ModuleWrap<T>) {
 }
 
 export async function createApp<T>(setup: ModuleSetup<T>) {
-  const appModule = defineModule(setup);
+  const appModule = define(setup);
 
   for (const moduleWrap of modules) {
     if (moduleWrap.meta.initHandler) {

@@ -35,8 +35,9 @@ services:
     image: 'postgres:14.6'
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - db_pg_data:/var/lib/postgresql/data
     logging:
@@ -63,6 +64,10 @@ services:
       - NODE_HOST=tmp-cool-backup_app
       - DIR_DATA_FOR_BACKUP=/appdata/data
       - DIR_BACKUPS=/appdata/backups
+      - POSTGRES_HOST=tmp-cool-db
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - app_data:/appdata/data
       - backups_data:/appdata/backups
@@ -76,7 +81,7 @@ services:
       dockerfile: ./Dockerfile
     environment:
       - NODE_HOST=tmp-cool-backend
-      - DATABASE_URL=postgresql://postgres:postgres@tmp-cool-db:5432/postgres?schema=public
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@tmp-cool-db:5432/${POSTGRES_DB}?schema=public
       - REDIS_HOST=tmp-cool-redis
       - DIR_DATA=/appdata/data
     volumes:

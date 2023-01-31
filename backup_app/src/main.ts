@@ -9,6 +9,7 @@ import routes from './routes';
 import { initAppRouter } from '@core/router';
 import { httpErrorCatch } from '@core/catch_error';
 import { createApp } from '@core/application';
+import fs from 'fs-extra';
 
 const logger = createAppLogger('App');
 
@@ -25,7 +26,7 @@ createApp((ctx) => {
   app.use(httpErrorCatch);
   useCronService(new CronService());
 
-  ctx.onModuleInit(() => {
+  ctx.onInit(async () => {
     app.listen(env.NODE_PORT, () => {
       logger.log(`app listen port: ${env.NODE_PORT}`);
     });
