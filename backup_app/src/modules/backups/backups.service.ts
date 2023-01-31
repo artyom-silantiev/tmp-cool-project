@@ -119,8 +119,7 @@ export class BackupsService {
     await zip.extractAllTo(backupDir);
 
     await this.restoreDataDir(backupDir);
-
-    // TODO dump.sql
+    await this.restoreFromSqlDump(backupDir);
   }
 
   private async restoreFromSqlDump(backupDir: string) {
