@@ -69,9 +69,18 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
+      - ./backup_app/src:/usr/src/app/src
+      - ./backup_app/.env:/usr/src/app/.env
       - app_data:/appdata/data
       - backups_data:/appdata/backups
       - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.services.backend.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.backend.rule=Host(`backup.localhost`) && PathPrefix(`/api`)'
+      - 'traefik.http.routers.backend.entrypoints=web'
+      - 'traefik.http.routers.backend.service=backend'
+    command: 'yarn dev'
 
   backend:
     container_name: tmp-cool-backend
@@ -85,13 +94,15 @@ services:
       - REDIS_HOST=tmp-cool-redis
       - DIR_DATA=/appdata/data
     volumes:
+      - ./backend/src:/usr/src/app/src
+      - ./backend/.env:/usr/src/app/.env
       - app_data:/appdata/data
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.services.backend.loadbalancer.server.port=3000'
-      - 'traefik.http.routers.backend.rule=Host(`site.localhost`) && PathPrefix(`/api`)'
-      - 'traefik.http.routers.backend.entrypoints=web'
-      - 'traefik.http.routers.backend.service=backend'
+      - 'traefik.http.services.bakupapp.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.bakupapp.rule=Host(`site.localhost`) && PathPrefix(`/api`, `/swagger`, `/local_files`)'
+      - 'traefik.http.routers.bakupapp.entrypoints=web'
+      - 'traefik.http.routers.bakupapp.service=bakupapp'
 
   site:
     container_name: tmp-cool-site
@@ -109,6 +120,6 @@ services:
       - 'traefik.http.routers.sitessr.service=sitessr'
 
 volumes:
-  - db_pg_data:
-  - app_data:
-  - backups_data:
+  db_pg_data:
+  app_data:
+  backups_data:
