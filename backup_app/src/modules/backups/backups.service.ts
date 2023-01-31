@@ -32,8 +32,6 @@ export class BackupsService {
     console.log('onModuleInit', 'BackupsService');
   }
 
-  getBackupFileInfo() {}
-
   async getBackups() {
     const backupsFiles = [] as BackupFileInfo[];
 
@@ -53,6 +51,11 @@ export class BackupsService {
     }
 
     return backupsFiles;
+  }
+
+  getAbsBackupFile(backupFileName: string) {
+    const absFile = path.resolve(env.DIR_BACKUPS, backupFileName);
+    return absFile;
   }
 
   async deleteBackupFile(backupFileName: string) {

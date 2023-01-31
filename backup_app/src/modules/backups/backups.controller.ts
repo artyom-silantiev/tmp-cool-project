@@ -15,6 +15,14 @@ export class BackupsController {
     return await this.backupsService.getBackups();
   }
 
+  @Get(':name')
+  async downloadBackup(ctx: Ctx) {
+    const absBackupFile = await this.backupsService.getAbsBackupFile(
+      ctx.params['name']
+    );
+    ctx.res.sendFile(absBackupFile);
+  }
+
   @Post('')
   async createBackup(ctx: Ctx) {
     const backupFileInfo = await this.backupsService.createBackup();
@@ -33,8 +41,8 @@ export class BackupsController {
     return '';
   }
 
-  @Post('load')
-  loadBackup(ctx: Ctx) {
+  @Post('upload')
+  uploadBackup(ctx: Ctx) {
     return '';
 
     // TODO
