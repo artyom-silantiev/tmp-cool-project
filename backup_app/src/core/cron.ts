@@ -156,6 +156,7 @@ export enum ScheduleExpression {
   EVERY_HOUR = '0 0-23/1 * * *',
   EVERY_DAY = '0 0 0 * * *',
   EVERY_WEEK = '0 0 * * 0',
+  EVERY_MONTH = '0 0 1 * 0',
   EVERY_QUARTER = '0 0 1 */3 *',
   EVERY_6_MONTHS = '0 0 1 */6 *',
   EVERY_YEAR = '0 0 1 1 *',

@@ -1,13 +1,13 @@
-import { addModule } from './application';
+import { addAppModule } from './application';
 
 type LifecycleHandler = () => Promise<void> | void;
 type ModuleMeta = {
   items: any[];
-  onModuleInitHandler: LifecycleHandler | null;
-  onModuleDestroyHandler: LifecycleHandler | null;
+  initHandler: LifecycleHandler | null;
+  destroyHandler: LifecycleHandler | null;
 };
 export type ModuleWrap<T> = {
-  moduleId: number;
+  id: number;
   meta: ModuleMeta;
   module: T;
 };
@@ -20,10 +20,10 @@ function getModuleSetupCtx(meta: ModuleMeta) {
       return item;
     },
     onModuleInit(handler: LifecycleHandler) {
-      meta.onModuleInitHandler = handler;
+      meta.initHandler = handler;
     },
     onModuleDestroy(handler: LifecycleHandler) {
-      meta.onModuleDestroyHandler = handler;
+      meta.destroyHandler = handler;
     },
   };
 }
@@ -34,19 +34,22 @@ export type ModuleSetup<T> = (ctx: ModuleSetupCtx) => T;
 let modulesCount = 0;
 export function defineModule<T>(setup: ModuleSetup<T>) {
   const moduleId = modulesCount++;
+
   const meta = {
     items: [] as any[],
-    onModuleInitHandler: null as null | { (): Promise<void> },
-    onModuleDestroyHandler: null as null | { (): Promise<void> },
-  };
+    initHandler: null as null | { (): Promise<void> },
+    destroyHandler: null as null | { (): Promise<void> },
+  } as ModuleMeta;
+
   const moduleCtx = getModuleSetupCtx(meta);
+
   const moduleWrap = {
-    moduleId,
+    id: moduleId,
     meta,
     module: setup(moduleCtx),
-  };
+  } as ModuleWrap<T>;
 
-  addModule(moduleWrap);
+  addAppModule(moduleWrap);
 
   return moduleWrap.module;
 }

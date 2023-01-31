@@ -11,17 +11,27 @@ export class BackupsController {
   }
 
   @Get('')
-  getBackups(ctx: Ctx) {}
+  getBackups(ctx: Ctx) {
+    return '';
+  }
 
   @Post('')
-  createBackup(ctx: Ctx) {}
+  createBackup(ctx: Ctx) {
+    return '';
+  }
 
   @Post(':uid')
-  useBackup(ctx: Ctx) {}
+  useBackup(ctx: Ctx) {
+    return '';
+  }
 
   @Delete(':uid')
-  deleteBackups(ctx: Ctx) {}
+  deleteBackups(ctx: Ctx) {
+    return '';
+  }
 
   @Post('load')
-  loadBackup(ctx: Ctx) {}
+  loadBackup(ctx: Ctx) {
+    return '';
+  }
 }
