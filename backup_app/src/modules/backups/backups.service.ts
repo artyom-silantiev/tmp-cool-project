@@ -9,12 +9,6 @@ import { useEnv } from 'lib/env/env';
 const asyncExec = promisify(exec);
 const env = useEnv();
 
-const zip = new AdmZip();
-
-type BackupsMeta = {
-  lastBackupCreatedAt: Date;
-};
-
 function getBackUpFileInfo(backupFileName: string) {
   const absFile = path.resolve(env.DIR_BACKUPS, backupFileName);
 
