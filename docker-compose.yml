@@ -54,34 +54,6 @@ services:
       - '127.0.0.1:6379:6379'
     restart: always
 
-  backup_app:
-    container_name: tmp-cool-backup_app
-    image: tmp-cool-backup_app
-    build:
-      context: backup_app
-      dockerfile: ./Dockerfile
-    environment:
-      - NODE_HOST=tmp-cool-backup_app
-      - DIR_DATA_FOR_BACKUP=/appdata/data
-      - DIR_BACKUPS=/appdata/backups
-      - POSTGRES_HOST=tmp-cool-db
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    volumes:
-      - ./backup_app/src:/usr/src/app/src
-      - ./backup_app/.env:/usr/src/app/.env
-      - app_data:/appdata/data
-      - backups_data:/appdata/backups
-      - /var/run/docker.sock:/var/run/docker.sock
-    labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.services.backend.loadbalancer.server.port=3000'
-      - 'traefik.http.routers.backend.rule=Host(`backup.localhost`) && PathPrefix(`/api`)'
-      - 'traefik.http.routers.backend.entrypoints=web'
-      - 'traefik.http.routers.backend.service=backend'
-    command: 'yarn dev'
-
   backend:
     container_name: tmp-cool-backend
     image: tmp-cool-backend
@@ -92,11 +64,18 @@ services:
       - NODE_HOST=tmp-cool-backend
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@tmp-cool-db:5432/${POSTGRES_DB}?schema=public
       - REDIS_HOST=tmp-cool-redis
-      - DIR_DATA=/appdata/data
+      - DIR_DATA=/v/app/data
+      - DIR_BACKUPS=/v/backups/data
+      - POSTGRES_HOST=tmp-cool-db
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - ./backend/src:/usr/src/app/src
       - ./backend/.env:/usr/src/app/.env
-      - app_data:/appdata/data
+      - app:/v/app
+      - backups:/v/backups
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.services.bakupapp.loadbalancer.server.port=3000'
@@ -121,5 +100,5 @@ services:
 
 volumes:
   db_pg_data:
-  app_data:
-  backups_data:
+  app:
+  backups:

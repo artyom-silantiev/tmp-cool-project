@@ -80,17 +80,6 @@ export class BackupsService {
 
     await asyncExec(cmd);
 
-    /*
-    const json = {
-      data: [
-        Math.random(),
-        Date.now(),
-        Math.random() * Math.random() * Math.random() * Math.random(),
-      ],
-    };
-    await fs.writeJSON(dumpSqlFile, json);
-    */
-
     return dumpSqlFile;
   }
 
@@ -123,6 +112,8 @@ export class BackupsService {
 
     await this.restoreDataDir(backupDir);
     await this.restoreFromSqlDump(backupDir);
+
+    await fs.remove(backupDir);
   }
 
   private async restoreFromSqlDump(backupDir: string) {
@@ -151,7 +142,5 @@ export class BackupsService {
       await fs.move(newDataDir, appDataDir);
       await fs.remove(tempDataDir);
     }
-
-    await fs.remove(backupDir);
   }
 }
