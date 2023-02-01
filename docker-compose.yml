@@ -47,6 +47,20 @@ services:
     ports:
       - '127.0.0.1:5432:5432'
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.services.pgadmin4.loadbalancer.server.port=80'
+      - 'traefik.http.routers.pgadmin4.rule=Host(`pgadmin.localhost`)'
+      - 'traefik.http.routers.pgadmin4.entrypoints=web'
+      - 'traefik.http.routers.pgadmin4.service=pgadmin4'
+
   redis:
     container_name: tmp-cool-redis
     image: redis
