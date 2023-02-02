@@ -1,0 +1,131 @@
+version: '3.9'
+
+services:
+  traefik:
+    container_name: 'tmp-cool-traefik'
+    image: 'traefik:v2.9'
+    command:
+      #- "--log.level=DEBUG"
+      - '--api.insecure=true'
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--entrypoints.web.address=:80'
+    ports:
+      - '80:80'
+      - '8080:8080'
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+
+  portainer:
+    container_name: tmp-cool-portainer
+    image: portainer/portainer-ce:2.5.0-alpine
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.portainer.rule=Host(`portainer.localhost`)'
+      - 'traefik.http.routers.portainer.entrypoints=web'
+      - 'traefik.http.services.portainer.loadbalancer.server.port=9000'
+      - 'traefik.http.routers.portainer.service=portainer'
+
+  db:
+    container_name: tmp-cool-db
+    image: 'postgres:14.6'
+    restart: always
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - db_pg_data:/var/lib/postgresql/data
+    logging:
+      options:
+        max-size: 10m
+        max-file: '3'
+    ports:
+      - '127.0.0.1:5432:5432'
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.services.pgadmin4.loadbalancer.server.port=80'
+      - 'traefik.http.routers.pgadmin4.rule=Host(`pgadmin.localhost`)'
+      - 'traefik.http.routers.pgadmin4.entrypoints=web'
+      - 'traefik.http.routers.pgadmin4.service=pgadmin4'
+
+  redis:
+    container_name: tmp-cool-redis
+    image: redis
+    ports:
+      - '127.0.0.1:6379:6379'
+    restart: always
+
+  maildev:
+    container_name: tmp-cool-mail
+    image: maildev/maildev
+    restart: always
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.services.maildev.loadbalancer.server.port=1080'
+      - 'traefik.http.routers.maildev.rule=Host(`maildev.localhost`)'
+      - 'traefik.http.routers.maildev.entrypoints=web'
+      - 'traefik.http.routers.maildev.service=maildev'
+
+  backend:
+    container_name: tmp-cool-backend
+    image: tmp-cool-backend
+    build:
+      context: backend
+      dockerfile: ./Dockerfile
+    environment:
+      - NODE_HOST=tmp-cool-backend
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@tmp-cool-db:5432/${POSTGRES_DB}?schema=public
+      - REDIS_HOST=tmp-cool-redis
+      - DIR_DATA=/v/app/data
+      - DIR_BACKUPS=/v/backups/data
+      - MAILER_SMTP_HOST=tmp-cool-mail
+      - MAILER_SMTP_PORT=1025
+      - POSTGRES_HOST=tmp-cool-db
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./backend/src:/usr/src/app/src
+      - ./backend/.env:/usr/src/app/.env
+      - app:/v/app
+      - backups:/v/backups
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.services.bakupapp.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.bakupapp.rule=Host(`site.localhost`) && PathPrefix(`/api`, `/swagger`, `/local_files`)'
+      - 'traefik.http.routers.bakupapp.entrypoints=web'
+      - 'traefik.http.routers.bakupapp.service=bakupapp'
+
+  site:
+    container_name: tmp-cool-site
+    image: tmp-cool-site
+    build:
+      context: frontend
+      dockerfile: ./Dockerfile
+    environment:
+      - VUE_BASE_URL_API=http://tmp-cool-backend:3000/api
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.services.sitessr.loadbalancer.server.port=3300'
+      - 'traefik.http.routers.sitessr.rule=Host(`site.localhost`)'
+      - 'traefik.http.routers.sitessr.entrypoints=web'
+      - 'traefik.http.routers.sitessr.service=sitessr'
+
+volumes:
+  db_pg_data:
+  app:
+  backups:
