@@ -86,7 +86,6 @@ services:
       context: backend
       dockerfile: ./Dockerfile
     environment:
-      - NODE_HOST=tmp-cool-backend
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@tmp-cool-db:5432/${POSTGRES_DB}?schema=public
       - REDIS_HOST=tmp-cool-redis
       - DIR_DATA=/v/app/data
