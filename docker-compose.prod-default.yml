@@ -10,9 +10,10 @@ services:
       - '--providers.docker=true'
       - '--providers.docker.exposedbydefault=false'
       - '--entrypoints.web.address=:80'
+      - '--entrypoints.web-secure.address=:80'
     ports:
       - '80:80'
-      - '8080:8080'
+      - '443:443'
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock:ro'
 
@@ -75,7 +76,7 @@ services:
       context: backend
       dockerfile: ./Dockerfile
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - NODE_HOST=tmp-cool-backend
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@tmp-cool-db:5432/${POSTGRES_DB}?schema=public
       - REDIS_HOST=tmp-cool-redis
@@ -87,14 +88,12 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./backend/src:/usr/src/app/src
-      - ./backend/.env:/usr/src/app/.env
       - app:/v/app
       - backups:/v/backups
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.services.bakupapp.loadbalancer.server.port=3000'
-      - 'traefik.http.routers.bakupapp.rule=Host(`site.localhost`) && PathPrefix(`/api`, `/swagger`, `/local_files`)'
+      - 'traefik.http.routers.bakupapp.rule=Host(`site.localhost`) && PathPrefix(`/api`, `/swagger`, `/files`)'
       - 'traefik.http.routers.bakupapp.entrypoints=web'
       - 'traefik.http.routers.bakupapp.service=bakupapp'
 
@@ -105,7 +104,7 @@ services:
       context: frontend
       dockerfile: ./Dockerfile
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - VUE_BASE_URL_API=http://tmp-cool-backend:3000/api
     labels:
       - 'traefik.enable=true'

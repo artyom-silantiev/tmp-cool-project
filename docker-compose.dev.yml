@@ -101,8 +101,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./backend/src:/app/src
-      - ./backend/.env:/app/.env
+      - ./backend:/app
       - app:/v/app
       - backups:/v/backups
     labels:

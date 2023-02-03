@@ -11,8 +11,8 @@ docker-compose -f docker-compose.dev.yml up -d
 cp .env.default .env
 nano .env
 
-cp docker-compose.yml docker-compose.prod.yml
+cp docker-compose.prod-default.yml docker-compose.yml
 nano docker-compose.prod.yml
 
-docker-compose -f docker-compose.prod.yml up -d
+docker-compose up -d
 ```
