@@ -1,2 +1,2 @@
-.env
-docker-compose.prod.yml
+/.env
+/docker-compose.prod.yml

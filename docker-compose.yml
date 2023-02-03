@@ -75,6 +75,7 @@ services:
       context: backend
       dockerfile: ./Dockerfile
     environment:
+      - NODE_ENV=development
       - NODE_HOST=tmp-cool-backend
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@tmp-cool-db:5432/${POSTGRES_DB}?schema=public
       - REDIS_HOST=tmp-cool-redis
@@ -104,6 +105,7 @@ services:
       context: frontend
       dockerfile: ./Dockerfile
     environment:
+      - NODE_ENV=development
       - VUE_BASE_URL_API=http://tmp-cool-backend:3000/api
     labels:
       - 'traefik.enable=true'

@@ -86,6 +86,7 @@ services:
       context: backend
       dockerfile: ./Dockerfile
     environment:
+      - NODE_ENV=development
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@tmp-cool-db:5432/${POSTGRES_DB}?schema=public
       - REDIS_HOST=tmp-cool-redis
       - DIR_DATA=/v/app/data
@@ -98,8 +99,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./backend/src:/usr/src/app/src
-      - ./backend/.env:/usr/src/app/.env
+      - ./backend/src:/app/src
+      - ./backend/.env:/app/.env
       - app:/v/app
       - backups:/v/backups
     labels:
@@ -116,7 +117,11 @@ services:
       context: frontend
       dockerfile: ./Dockerfile
     environment:
+      - NODE_ENV=development
       - VUE_BASE_URL_API=http://tmp-cool-backend:3000/api
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/.env:/app/.env
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.services.sitessr.loadbalancer.server.port=3300'
