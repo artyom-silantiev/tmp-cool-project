@@ -100,13 +100,13 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - ./backend/src:/app/src
       - ./backend/.env:/app/.env
       - ./backend/package.json:/app/package.json
       - ./backend/yarn.lock:/app/yarn.lock
       - app:/v/app
       - backups:/v/backups
+      - /var/run/docker.sock:/var/run/docker.sock
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.services.bakupapp.loadbalancer.server.port=3000'
