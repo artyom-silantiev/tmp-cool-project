@@ -10,8 +10,10 @@ services:
       - '--providers.docker=true'
       - '--providers.docker.exposedbydefault=false'
       - '--entrypoints.web.address=:80'
+      - '--entrypoints.webio.address=:24678'
     ports:
       - '80:80'
+      - '24678:24678'
       - '8080:8080'
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock:ro'
@@ -120,14 +122,17 @@ services:
       - NODE_ENV=development
       - VUE_BASE_URL_API=http://tmp-cool-backend:3000/api
     volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/.env:/app/.env
+      - ./frontend:/app
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.services.sitessr.loadbalancer.server.port=3300'
+      - 'traefik.http.services.sitessr.loadbalancer.server.port=3000'
       - 'traefik.http.routers.sitessr.rule=Host(`site.localhost`)'
       - 'traefik.http.routers.sitessr.entrypoints=web'
       - 'traefik.http.routers.sitessr.service=sitessr'
+      - 'traefik.http.services.sitessr-vite.loadbalancer.server.port=24678'
+      - 'traefik.http.routers.sitessr-vite.rule=Host(`site.localhost`)'
+      - 'traefik.http.routers.sitessr-vite.entrypoints=webio'
+      - 'traefik.http.routers.sitessr-vite.service=sitessr-vite'
 
 volumes:
   db_pg_data:
