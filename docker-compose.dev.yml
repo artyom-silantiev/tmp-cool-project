@@ -106,7 +106,7 @@ services:
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.services.bakupapp.loadbalancer.server.port=3000'
-      - 'traefik.http.routers.bakupapp.rule=Host(`site.localhost`) && PathPrefix(`/api`, `/swagger`, `/local_files`)'
+      - 'traefik.http.routers.bakupapp.rule=Host(`site.localhost`) && PathPrefix(`/api`, `/swagger`, `/files`)'
       - 'traefik.http.routers.bakupapp.entrypoints=web'
       - 'traefik.http.routers.bakupapp.service=bakupapp'
 
